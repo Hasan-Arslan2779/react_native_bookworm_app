@@ -13,7 +13,7 @@ import styles from "../../assets/styles/login.styles";
 import { Image } from "react-native";
 import COLORS from "../../constant/color";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useAuthStore } from "../../store/authStore.js";
 
 const LoginScreen = () => {
@@ -23,8 +23,22 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    const result = await login(email, password);
-    if (!result.succes) Alert.alert("Error", result.error);
+    try {
+      const result = await login(email, password);
+      if (!result.success) {
+        Alert.alert("Error", result.error);
+      } else {
+        setTimeout(() => {
+          router.replace("/(tabs)");
+        }, 100);
+      }
+    } catch (error) {
+      console.log("Login error:", error);
+      Alert.alert(
+        "Error",
+        "Beklenmeyen bir hata oluştu lütfen tekrar deneyin."
+      );
+    }
   };
 
   return (

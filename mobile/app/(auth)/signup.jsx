@@ -1,40 +1,50 @@
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
+  View,
   Text,
+  Platform,
+  KeyboardAvoidingView,
   TextInput,
   TouchableOpacity,
-  View,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import styles from "../../assets/styles/signup.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constant/color";
 import { useState } from "react";
-import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "../../store/authStore";
-const Signup = () => {
-  const navigation = useNavigation();
+
+export default function Signup() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { user, isLoading, register } = useAuthStore();
+  const { user, isLoading, register, token } = useAuthStore();
+
+  const router = useRouter();
 
   const handleSignUp = async () => {
-    const result = await register(username, email, password);
-    if (!result.succes) Alert.alert("Error", result.error);
+    try {
+      const response = await register(username, email, password);
+      if (response.success) {
+        Alert.alert("Success", "Kayıt Tamamlandı!");
+        router.replace("/");
+      } else {
+        Alert.alert("Error", response.error);
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Beklenmeyen bir hata oluştu lütfen tekrar deneyin."
+      );
+    }
   };
+
   return (
     <KeyboardAvoidingView
-      style={{
-        flex: 1,
-      }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.container}>
@@ -44,6 +54,7 @@ const Signup = () => {
             <Text style={styles.title}>BookWorm 🪱</Text>
             <Text style={styles.subtitle}>Share your favorite reads</Text>
           </View>
+
           <View style={styles.formContainer}>
             {/* USERNAME INPUT */}
             <View style={styles.inputGroup}>
@@ -118,6 +129,7 @@ const Signup = () => {
                 </TouchableOpacity>
               </View>
             </View>
+
             {/* SIGNUP BUTTON */}
             <TouchableOpacity
               style={styles.button}
@@ -130,6 +142,7 @@ const Signup = () => {
                 <Text style={styles.buttonText}>Sign Up</Text>
               )}
             </TouchableOpacity>
+
             {/* FOOTER */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account?</Text>
@@ -142,6 +155,4 @@ const Signup = () => {
       </View>
     </KeyboardAvoidingView>
   );
-};
-
-export default Signup;
+}

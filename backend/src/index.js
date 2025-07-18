@@ -14,11 +14,20 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3001;
 
+//Cors
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 // Middleware
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/", pageRoutes);
-app.use(cors());
+
 //Listen to the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
