@@ -13,9 +13,9 @@ router.post("/", protectRoute, async (req, res) => {
     }
 
     //upload image to cloudinary
-    // const uploadResponse = await cloudinary.uploader.upload(image, {
-    //   folder: "bookworm",
-    // });
+    const uploadResponse = await cloudinary.uploader.upload(image, {
+      folder: "bookworm",
+    });
     // Güvenli URL'yi al
     const imageUrl = uploadResponse.secure_url;
 

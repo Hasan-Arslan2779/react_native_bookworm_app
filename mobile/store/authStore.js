@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { API_URL } from "../constant/api";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -12,7 +13,7 @@ export const useAuthStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.post(
-        "http://192.168.155.149:3000/api/auth/register", // <-- Doğru endpoint!
+        `${API_URL}/auth/register`, // <-- Doğru endpoint!
         { username, email, password }
       );
 
@@ -45,8 +46,11 @@ export const useAuthStore = create((set) => ({
 
     try {
       const response = await axios.post(
-        "http://192.168.155.149:3000/api/auth/login",
-        { email, password }
+        `${API_URL}/auth/login`, // <-- Doğru endpoint!
+        {
+          email,
+          password,
+        }
       );
 
       await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
