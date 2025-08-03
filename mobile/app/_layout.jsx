@@ -4,7 +4,6 @@ import SafeScreen from "../components/SafeScreen";
 import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
-
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();

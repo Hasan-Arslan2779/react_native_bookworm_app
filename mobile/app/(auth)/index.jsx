@@ -15,6 +15,7 @@ import COLORS from "../../constant/color";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useAuthStore } from "../../store/authStore.js";
+import { API_URL } from "../../constant/api.js";
 
 const LoginScreen = () => {
   const { user, isLoading, login } = useAuthStore();

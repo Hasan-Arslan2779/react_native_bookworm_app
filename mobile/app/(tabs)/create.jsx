@@ -20,6 +20,7 @@ import { useAuthStore } from "../../store/authStore";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { API_URL } from "../../constant/api";
+import axios from "axios";
 
 export default function Create() {
   const [title, setTitle] = useState("");
@@ -99,23 +100,24 @@ export default function Create() {
         : "image/jpeg";
 
       const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
-
-      const response = await fetch(`${API_URL}/books`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${API_URL}/books`,
+        {
           title,
           caption,
           rating: rating.toString(),
           image: imageDataUrl,
-        }),
-      });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      const data = response.data;
+      if (!data) throw new Error(data.message || "Something went wrong");
 
       Alert.alert("Success", "Your book recommendation has been posted!");
       setTitle("");
