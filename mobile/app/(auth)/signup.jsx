@@ -29,8 +29,8 @@ export default function Signup() {
     try {
       const response = await register(username, email, password);
       if (response.success) {
-        Alert.alert("Success", "Kayıt Tamamlandı!");
-        router.replace("/");
+        router.replace("/(auth)");
+        Alert.alert("Success", "Kayıt Tamamlandı ");
       } else {
         Alert.alert("Error", response.error);
       }
@@ -39,6 +39,7 @@ export default function Signup() {
         "Error",
         "Beklenmeyen bir hata oluştu lütfen tekrar deneyin."
       );
+      console.log(error);
     }
   };
 

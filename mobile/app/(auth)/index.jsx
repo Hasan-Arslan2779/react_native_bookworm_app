@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../../assets/styles/login.styles";
 import { Image } from "react-native";
 import COLORS from "../../constant/color";
@@ -18,7 +18,7 @@ import { useAuthStore } from "../../store/authStore.js";
 import { API_URL } from "../../constant/api.js";
 
 const LoginScreen = () => {
-  const { user, isLoading, login } = useAuthStore();
+  const { user, isLoading, login, isCheckingAuth } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +42,18 @@ const LoginScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (!isCheckingAuth && user) {
+      router.replace("/(tabs)");
+    }
+  }, [isCheckingAuth, user]);
+  if (isCheckingAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
   return (
     <KeyboardAvoidingView
       style={{

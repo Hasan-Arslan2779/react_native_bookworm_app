@@ -1,6 +1,8 @@
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,18 +19,21 @@ import LogoutButton from "../../components/LogoutButton";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constant/color";
 import { Image } from "expo-image";
+import { sleep } from ".";
+import Loader from "../../components/Loader";
 const Profile = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteBookId, setDeleteBookId] = useState(null);
   const router = useRouter();
 
   const { token } = useAuthStore(); // Assuming useAuth is a custom hook to get the auth token
 
   // Fetch user profile data
-  const fetchData = async () => {
+  const fetchData = async (bookId) => {
     try {
-      setLoading(true);
+      setDeleteBookId(bookId);
       // Simulate fetching data
       const response = await axios.get(`${API_URL}/books/user`, {
         headers: {
@@ -45,14 +50,54 @@ const Profile = () => {
         error.message || "Failed to load profile data.Pull down to refresh."
       );
     } finally {
-      setLoading(false);
+      setDeleteBookId(null);
     }
   };
   //
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [books]);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await sleep(500);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  ///
+  const handleDeleteBook = async (bookId) => {
+    try {
+      setLoading(true);
+      const response = await axios.delete(`${API_URL}/books/${bookId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.data;
+      if (!data) throw new Error(data.message || "Failed to delete book");
+      setBooks(books.filter((book) => book._id !== bookId));
+      Alert.alert("Success", "Recommendation deleted successfully");
+    } catch (error) {
+      console.log("Ther is an error ", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  //
+  const confirmDelete = (bookId) => {
+    Alert.alert(
+      "Delete Recommendation",
+      "Are you sure you want to delete this recommendation?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => handleDeleteBook(bookId),
+        },
+      ]
+    );
+  };
+  //
   const renderRatingStars = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -68,6 +113,7 @@ const Profile = () => {
     }
     return stars;
   };
+  ///
   const renderBookItem = ({ item }) => (
     <View style={styles.bookItem}>
       <Image source={{ uri: item.image }} style={styles.bookImage} />
@@ -76,9 +122,26 @@ const Profile = () => {
         <View style={styles.ratingContainer}>
           {renderRatingStars(item.rating)}
         </View>
+        <Text style={styles.bookCaption} numberOfLines={2}>
+          {item.caption}
+        </Text>
+        <Text style={styles.bookDate}>
+          {new Date(item.createdAt).toLocaleDateString()}
+        </Text>
       </View>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => confirmDelete(item._id)}
+      >
+        {deleteBookId === item._id ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : (
+          <Ionicons name="trash-outline" size={20} color={COLORS.primary} />
+        )}
+      </TouchableOpacity>
     </View>
   );
+
   return (
     <View style={styles.container}>
       <ProfileHeader />
@@ -96,6 +159,14 @@ const Profile = () => {
         keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.booksList}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons

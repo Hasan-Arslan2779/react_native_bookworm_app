@@ -2,6 +2,7 @@ import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_URL } from "../constant/api";
+import { router } from "expo-router";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -11,21 +12,15 @@ export const useAuthStore = create((set) => ({
 
   register: async (username, email, password) => {
     set({ isLoading: true });
+
     try {
-      const response = await axios.post(
-        `${API_URL}/auth/register`, // <-- Doğru endpoint!
-        { username, email, password }
-      );
-
-      // Axios hata durumunda otomatik olarak catch'e düşer, burada kontrol gerekmez
-      await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-      await AsyncStorage.setItem("token", response.data.token);
-
-      set({
-        token: response.data.token,
-        user: response.data.user,
-        isLoading: false,
+      const response = await axios.post(`${API_URL}/auth/register`, {
+        username,
+        email,
+        password,
       });
+
+      set({ isLoading: false });
 
       return { success: true };
     } catch (error) {
@@ -43,7 +38,6 @@ export const useAuthStore = create((set) => ({
 
   login: async (email, password) => {
     set({ isLoading: true });
-
     try {
       const response = await axios.post(
         `${API_URL}/auth/login`, // <-- Doğru endpoint!
@@ -52,13 +46,13 @@ export const useAuthStore = create((set) => ({
           password,
         }
       );
-
+      const data = await response.data;
       await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
       await AsyncStorage.setItem("token", response.data.token);
 
       set({
-        token: response.data.token,
-        user: response.data.user,
+        token: data.token,
+        user: data.user,
         isLoading: false,
       });
 
@@ -75,7 +69,6 @@ export const useAuthStore = create((set) => ({
       };
     }
   },
-
   checkAuth: async () => {
     try {
       const token = await AsyncStorage.getItem("token");
